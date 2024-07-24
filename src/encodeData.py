@@ -32,7 +32,7 @@ def EncodeDataUtility(data_set) -> QuantumCircuit:
         # https://quantumcomputing.stackexchange.com/questions/27077/qiskit-custom-multi-controlled-gate <- example (the documentations bad)
 
         rry = RYGate(datapoint) # custom gate
-        mcry = ControlledGate(name="mcry", num_qubits=n+1, params=rry.params, num_ctrl_qubits=n, definition=rry.definition, ctrl_state=binrep, base_gate=rry)
+        mcry = ControlledGate(name="mcry", num_qubits=n+1, params=rry.params, num_ctrl_qubits=n, definition=rry.definition, ctrl_state=binrep, base_gate=rry)   # custom control gate
         qc.append(mcry(range(n)))
         # ccry = ControlledGate(name="cry", num_qubits=3, params=rry.params, num_ctrl_qubits=2, definition=rry.definition,ctrl_state='01', base_gate=rry)
 

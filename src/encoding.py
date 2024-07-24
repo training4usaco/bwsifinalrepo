@@ -4,13 +4,6 @@ from qiskit_aer import Aer
 import math
 import numpy as np
 
-
-def encodeQubit(circuit: QuantumCircuit, qubit: int, val:float, max_val:float) -> None:
-    #Rotate qubit proportional amount to ratio of val to max_val
-    theta = val/max_val * math.pi
-
-    circuit.ry(theta, qubit)
-
 def decodeQubit(qc: QuantumCircuit, qubit: int, max_val) -> float:
 
     #outer product

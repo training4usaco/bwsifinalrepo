@@ -24,10 +24,10 @@ def customCost(predictions, labels, data):
     log_loss_1 = np.log(np.abs(np.subtract(labels, predictions[:,0]))/2)
     log_loss_2 = np.log(np.abs(np.subtract(labels, predictions[:,1]))/2)
 
-    linear_repeat_retailer = np.sum(repeat_retailer * predictions[:, 2])
-    linear_used_chip = np.sum(used_chip * predictions[:, 3])
-    linear_used_pin_number = np.sum(used_pin_number * predictions[:, 4])
-    linear_online_order = np.sum(online_order * predictions[:, 5])
+    linear_repeat_retailer =  np.abs(np.subtract(labels, predictions[:,2]))/2
+    linear_used_chip = np.abs(np.subtract(labels, predictions[:,3]))/2
+    linear_used_pin_number = np.abs(np.subtract(labels, predictions[:,4]))/2
+    linear_online_order = np.abs(np.subtract(labels, predictions[:,5]))/2
 
     cost = np.sum(log_loss_1, log_loss_2, 
                   linear_repeat_retailer, linear_used_chip, linear_used_pin_number, 

@@ -25,3 +25,10 @@ def AutoEncoder(data, num_categories, theta_list) -> QuantumCircuit:
     qc.compose(encoder_circuit, inplace=True)
     qc.compose(swap_circuit, inplace=True)
     qc.compose(encoder_circuit.inverse(), inplace=True)
+
+    # measure everything and put in classical register?? 
+    qc.measure(latent_register, classical_register[:num_latent]) # latent qubits 
+    qc.measure(trash_register, classical_register[num_latent:num_latent + num_trash]) # trash qubits
+    qc.measure(reference_register, classical_register[num_latent + num_trash:num_latent + 2 * num_trash]) # reference qubits
+    qc.measure(auxiliary_register, classical_register[num_latent + 2 * num_trash:num_latent + 2 * num_trash + 1]) # auxiliary qubits 
+

@@ -33,6 +33,9 @@ def Ansatz(num_latent, num_trash, theta_list) -> QuantumCircuit:
                 ansatz_circuit.cz((i - 1) % num_trash + num_latent, i)
             else:
                 ansatz_circuit.cz(i % num_trash + num_latent, i)
+
+    for i in range(num_latent, num_latent + num_trash):
+        ansatz_circuit.ry(theta_list[i], i)
     
     return ansatz_circuit
 

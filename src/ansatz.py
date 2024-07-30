@@ -7,6 +7,7 @@ def Ansatz(num_latent, num_trash, theta_list) -> QuantumCircuit:
 
     ansatz_circuit = QuantumCircuit(num_latent + num_trash)
 
+    # ry gates on all qubits
     n = num_latent + num_trash
     ry_circuit = QuantumCircuit(num_latent + num_trash)
     for i in range(n):

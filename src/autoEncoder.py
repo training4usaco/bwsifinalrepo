@@ -44,3 +44,4 @@ def AutoEncoder(data, num_categories, theta_list) -> QuantumCircuit:
     fidelity = np.sqrt(np.dot(input_data.conj(), output_state) ** 2)
 
     return 1.0 - fidelity
+

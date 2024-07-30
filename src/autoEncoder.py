@@ -3,7 +3,7 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit.quantum_info import Statevector
 from ansatz import Ansatz
 
-def AutoEncoder(data, num_categories, theta_list) -> QuantumCircuit:
+def AutoEncoder(data, num_categories, theta_list) -> float:
     num_latent = data.num_qubits - num_categories
     num_trash = num_categories
     latent_register = QuantumRegister(num_latent)

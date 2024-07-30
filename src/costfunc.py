@@ -21,17 +21,52 @@ def customCost(predictions, labels, data):
     used_pin_number = data[:, 5]
     online_order = data[:, 6]
 
-    log_loss_1 = -np.sum(labels * np.log(predictions[:, 0] + 1e-15) + (1 - labels) * np.log(1 - predictions[:, 0] + 1e-15))
-    log_loss_2 = -np.sum(labels * np.log(predictions[:, 1] + 1e-15) + (1 - labels) * np.log(1 - predictions[:, 1] + 1e-15))
+    log_loss_1 = np.log(np.abs(np.subtract(labels, predictions[:,0]))/2)
+    log_loss_2 = np.log(np.abs(np.subtract(labels, predictions[:,1]))/2)
 
+    linear_repeat_retailer =  np.abs(np.subtract(labels, predictions[:,2]))/2
+    linear_used_chip = np.abs(np.subtract(labels, predictions[:,3]))/2
+    linear_used_pin_number = np.abs(np.subtract(labels, predictions[:,4]))/2
+    linear_online_order = np.abs(np.subtract(labels, predictions[:,5]))/2
 
-    linear_repeat_retailer = np.sum(repeat_retailer * predictions[:, 2])
-    linear_used_chip = np.sum(used_chip * predictions[:, 3])
-    linear_used_pin_number = np.sum(used_pin_number * predictions[:, 4])
-    linear_online_order = np.sum(online_order * predictions[:, 5])
-
-    cost = np.sum(log_loss_1 + log_loss_2 + 
-                  linear_repeat_retailer + linear_used_chip + linear_used_pin_number + 
+    cost = np.sum(log_loss_1, log_loss_2, 
+                  linear_repeat_retailer, linear_used_chip, linear_used_pin_number, 
                   linear_online_order)
     
     return cost
+
+def compute_gradient(prediction, label, b, is_log):
+    if is_log:
+        if label == 0:
+            return 1 / np.log(b)
+        elif label == 1:
+            return -1 / np.log(b)
+    else:
+        if label == 0:
+            return 1 / 2
+        elif label == 1:
+            return -1 / 2
+        
+def update_parameters(params, gradients, learning_rate):
+    return params - learning_rate * gradients
+
+
+
+def optimize_vqc(params, data, labels, learning_rate, b, num_iterations):
+    
+    for iteration in range(num_iterations):
+        #this is where we call the function to apply the gates and get back the measurement?
+        #predictions = quantum_circuit(params, data)
+        gradients = np.zeros_like(params)
+
+        # Compute gradients
+        for i in range(len(data)):
+            for j in range(predictions.shape[1]):
+                is_log = j < 2  
+                gradient = compute_gradient(predictions[i, j], labels[i], b, is_log)
+                gradients[j] += gradient
+
+        cost = customCost(predictions, labels, data)
+        params = update_parameters(params, gradients, learning_rate)
+    
+    return params

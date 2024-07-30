@@ -29,7 +29,7 @@ def FRQI(data_set, num_categories) -> QuantumCircuit:
             mn = np.min(data_set[i])
 
             if(mx == mn):   # can't even happen but just in case
-                data_set[i] = 0
+                data_set[i][j] = 0
             else:
                 data_set[i][j] = (data_set[i][j] - mn) / (mx - mn) * pi   # scale properly. NOTE: SCALED FROM 0 TO PI!
 
@@ -48,9 +48,10 @@ def FRQI(data_set, num_categories) -> QuantumCircuit:
 
     return qc
 
-def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> QuantumCircuit:
+def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> tuple:
     # init
-    data_set = [[] for i in range(8)]
+    fraud_data_set = [[] for i in range(8)]
+    normal_data_set = [[] for i in range(8)]
 
     # reads in the data
     absolute_path = Path(__file__).parent / relative_path
@@ -60,7 +61,15 @@ def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> 
 
         for row in spamreader:  # pls help idk how to pythong
             for i in range(len(row)):
-                data_set[i].append(float(row[i]))
+                if(row[-1] == '1.0'):
+                    print('a')
+                    fraud_data_set[i].append(float(row[i]))
+                else:
+                    print('b')
+                    normal_data_set[i].append(float(row[i]))
+
+    print(fraud_data_set)
+    print(normal_data_set)
     
     # encode all the data and converts things to theta list
-    return FRQI(data_set, num_categories)
+    return (FRQI(normal_data_set, num_categories), FRQI(fraud_data_set, num_categories))

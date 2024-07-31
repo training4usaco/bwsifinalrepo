@@ -1,8 +1,7 @@
 import numpy as np
 import math 
 import random
-import costfunc as cf
-
+from sklearn.neighbors import KNeighborsClassifier
 
 class Particle:
     
@@ -53,12 +52,43 @@ class Swarm:
         self.bounds = [bounds*self.dims]
         self.lowestCosts = []
 
+    def find_closest_neighbors(particle_positions, query_position, n_neighbors):
+        X = np.array(particle_positions)
+        y = np.zeros(X.shape[0])
+        
+        knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        knn.fit(X, y)
+        
+        distances, indices = knn.kneighbors([query_position], n_neighbors=n_neighbors)
+        
+        closest_neighbors = [(X[i], distances[0][j]) for j, i in enumerate(indices[0])]
+        
+        return closest_neighbors
+
     def updateBestNeighbors(self):
-        #set position to best neighbor positions (lowest cost positions)
-        #append costs to lowestCosts
-        pass
+        for particle in self.particles:
+            particle_positions = [p.positions for p in self.particles]
+            n_neighbors = self.num_particles 
+            neighbors = self.find_closest_neighbors(particle_positions, particle.positions, n_neighbors)
+            
+            
+            costs = []
+            for neighbor in neighbors:
+                neighbor_position = neighbor[0]  
+                cost = self.calculate_cost(neighbor_position)
+                costs.append(cost)
+        
+            best_neighbor_index = np.argmin(costs)
+            best_neighbor_position = neighbors[best_neighbor_index][0]
+            
+             
+            if best_neighbor_index != 0: 
+                particle.best_neighbor_positions = best_neighbor_position
+            
+            particle.updateCost()
+            self.lowestCosts.append(particle.cost)
+    
+    
     def stepAlgorithm(self):        
         for i in self.particles:
             i.stepAlgorithm()
-
-    

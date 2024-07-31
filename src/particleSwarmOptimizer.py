@@ -1,16 +1,7 @@
 import numpy as np
 import math 
 import random
-<<<<<<< HEAD
 from sklearn.neighbors import KNeighborsClassifier
-
-class PSO:
-    def __init__(self, num_particles, dimensions, bounds):
-        self.particles = [self.Particle(dimensions, bounds) for _ in range(num_particles)]
-=======
-import costfunc as cf
->>>>>>> 08bb20a464df2457519cf568b861869f00daf257
-
 
 class Particle:
     
@@ -22,43 +13,6 @@ class Particle:
         self.inertia = w    
 
         self.positions = np.array([[random.uniform(bounds[i][0], bounds[i][1]) for i in range(dimensions)] for _ in range(num_particles)])
-<<<<<<< HEAD
-        self.velocities = np.zeros((num_particles, dimensions))
-        self.p_best_positions = self.positions.copy()
-
-
-    def closest_neighbor(particle_positions, query_position, n_neighbors):
-        X = np.array(particle_positions)
-        y = np.zeros(X.shape[0])
-
-
-        knn = KNeighborsClassifier(n_neighbors=n_neighbors)
-        knn.fit(X, y)
-            
-
-        distances, indices = knn.kneighbors([query_position], n_neighbors=n_neighbors)
-            
-        closest_neighbors = [(X[i], distances[0][j]) for j, i in enumerate(indices[0])]
-            
-        return closest_neighbors
-    
-    def update_position(self, particles):
-        particle_positions = [p.positions for p in particles if p is not self]
-
-        neighbors = self.find_closest_neighbors(particle_positions, self.positions, n_neighbors=self.num_particles - 1)
-        
-        costs = [self.calculate_cost(neighbor[0]) for neighbor in neighbors]
-
-
-        best_neighbor_index = np.argmin(costs)
-        best_neighbor_position = neighbors[best_neighbor_index][0]
-
-        self.positions = best_neighbor_position
-        
-
-
-        
-=======
         self.velocities = np.zeros((dimensions))
         self.best_positions = self.positions
         self.best_neighbor_positions = self.best_positions
@@ -79,7 +33,6 @@ class Particle:
             social = self.acceleration[1]*self.Us[1]*(self.best_neighbor_positions - self.positions[i])
 
             self.velocities[i] = inertia + cognitive + social
->>>>>>> 08bb20a464df2457519cf568b861869f00daf257
 
             self.positions[i] += self.velocities[i]
 
@@ -99,12 +52,43 @@ class Swarm:
         self.bounds = [bounds*self.dims]
         self.lowestCosts = []
 
+    def find_closest_neighbors(particle_positions, query_position, n_neighbors):
+        X = np.array(particle_positions)
+        y = np.zeros(X.shape[0])
+        
+        knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        knn.fit(X, y)
+        
+        distances, indices = knn.kneighbors([query_position], n_neighbors=n_neighbors)
+        
+        closest_neighbors = [(X[i], distances[0][j]) for j, i in enumerate(indices[0])]
+        
+        return closest_neighbors
+
     def updateBestNeighbors(self):
-        #set position to best neighbor positions (lowest cost positions)
-        #append costs to lowestCosts
-        pass
+        for particle in self.particles:
+            particle_positions = [p.positions for p in self.particles]
+            n_neighbors = self.num_particles 
+            neighbors = self.find_closest_neighbors(particle_positions, particle.positions, n_neighbors)
+            
+            
+            costs = []
+            for neighbor in neighbors:
+                neighbor_position = neighbor[0]  
+                cost = self.calculate_cost(neighbor_position)
+                costs.append(cost)
+        
+            best_neighbor_index = np.argmin(costs)
+            best_neighbor_position = neighbors[best_neighbor_index][0]
+            
+             
+            if best_neighbor_index != 0: 
+                particle.best_neighbor_positions = best_neighbor_position
+            
+            particle.updateCost()
+            self.lowestCosts.append(particle.cost)
+    
+    
     def stepAlgorithm(self):        
         for i in self.particles:
             i.stepAlgorithm()
-
-    

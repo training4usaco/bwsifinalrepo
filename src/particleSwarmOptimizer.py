@@ -78,7 +78,7 @@ class Swarm:
             costs = []
             for neighbor in neighbors:
                 neighbor_position = neighbor[0]  
-                cost = self.calculate_cost(neighbor_position)
+                cost = self.cf(neighbor_position)
                 costs.append(cost)
         
             best_neighbor_index = np.argmin(costs)

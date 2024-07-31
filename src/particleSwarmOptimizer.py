@@ -52,6 +52,7 @@ class Swarm:
         self.dims = dimensions
         self.bounds = [bounds*self.dims]
         self.lowestCosts = []
+        self.
 
     def updateBestNeighbors(self):
         #set position to best neighbor positions (lowest cost positions)

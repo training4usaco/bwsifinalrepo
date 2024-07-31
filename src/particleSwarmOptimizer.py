@@ -1,6 +1,7 @@
 import numpy as np
 import math 
 import random
+from costfunc import cf
 from sklearn.neighbors import KNeighborsClassifier
 
 class Particle:
@@ -51,6 +52,8 @@ class Swarm:
         self.dims = dimensions
         self.bounds = [bounds*self.dims]
         self.lowestCosts = []
+        self.tolerance = 2
+        self.epochTolerance = 10
 
     def find_closest_neighbors(particle_positions, query_position, n_neighbors):
         X = np.array(particle_positions)
@@ -87,8 +90,18 @@ class Swarm:
             
             particle.updateCost()
             self.lowestCosts.append(particle.cost)
+
+            if len(self.lowestCosts) > self.epochTolerance:
+                del self.lowestCosts[0]
     
     
-    def stepAlgorithm(self):        
+    def stepAlgorithm(self):      
+        self.updateBestNeighbors()  
         for i in self.particles:
             i.stepAlgorithm()
+    
+    def runAlgorithm(self):
+        if len(self.lowestCosts) == self.epochTolerance and np.ptp(self.lowestCosts, axis=1) < self.tolerance:
+            return
+        self.stepAlgorithm()
+            

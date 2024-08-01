@@ -2,9 +2,10 @@ import csv
 import numpy as np
 from math import ceil, log2, pi
 from pathlib import Path
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import ControlledGate
 from qiskit.circuit.library import RYGate
+from qiskit_aer import AerSimulator
 
 def DecimalToBinary(n):
     ret = ""
@@ -46,6 +47,14 @@ def FRQI(data_set, num_categories) -> QuantumCircuit:
 
     # print(qc.draw())
 
+    # qc.measure_all()
+    # simulator = AerSimulator()
+    # compiled_circuit = transpile(qc, simulator)
+    # sim_result = simulator.run(compiled_circuit).result()
+    # counts = sim_result.get_counts()
+
+    # print(counts)
+
     return qc
 
 def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> tuple:
@@ -65,6 +74,8 @@ def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> 
                     fraud_data_set[i].append(float(row[i]))
                 else:
                     normal_data_set[i].append(float(row[i]))
+
+    # print(normal_data_set)
     
     # encode all the data and converts things to theta list
     return (FRQI(normal_data_set, num_categories), FRQI(fraud_data_set, num_categories))

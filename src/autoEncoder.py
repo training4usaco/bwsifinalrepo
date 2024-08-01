@@ -51,19 +51,3 @@ def AutoEncoder(data, fraud, num_categories, theta_list) -> tuple:
     print(float(state[0][0]))
 
     return(float(state[0][0]), fraud)
-
-    # print(state[0][0])
-
-    # simulator = AerSimulator()
-    # compiled_circuit = transpile(qc, simulator)
-    # sim_result = simulator.run(compiled_circuit).result()
-    # counts = sim_result.get_counts()
-
-    # if('0' not in counts):
-    #     counts['0'] = 0
-
-    # print(counts)
-
-    # return (1.0 - counts['0'] / 1024.0, fraud)   # tuple of (probability of 1, fraud)
-
-

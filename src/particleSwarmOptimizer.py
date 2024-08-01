@@ -112,9 +112,9 @@ class Swarm:
 
         for i in self.particles:
             i.Us = newUs
-            
-            p0 = AutoEncoder(normal_data, self.dims, i.positions)
-            p1 = AutoEncoder(fraud_data, self.dims, i.positions)
+
+            p0 = AutoEncoder(normal_data, 0, self.dims, i.positions)
+            p1 = AutoEncoder(fraud_data, 1, self.dims, i.positions)
             i.stepAlgorithm(p0, p1)
 
             if i.cost == 0:

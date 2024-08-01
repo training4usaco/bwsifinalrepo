@@ -11,6 +11,8 @@ def test_circuit(num_qubits):
     qc.measure_all()
     return qc
 
+
+
 def customCost(predictions, labels, data):
     
     distance_from_home = data[:, 0]
@@ -35,15 +37,6 @@ def customCost(predictions, labels, data):
     
     return cost
 
-
-def probability_to_theta(z):
-    d1 = np.sqrt(z)
-    d2 = 1  
-    cos_theta = (1 + d2**2 - d1**2) / (2 * d2)
-    theta = np.arccos(cos_theta)
-    
-    return theta
-
 def compute_gradient(prediction, label, b, is_log):
     if is_log:
         if label == 0:
@@ -64,7 +57,7 @@ def update_parameters(params, gradients, learning_rate):
 def optimize_vqc(params, data, labels, learning_rate, b, num_iterations):
     
     for iteration in range(num_iterations):
-        #run autoencoder to get measurement?
+        #this is where we call the function to apply the gates and get back the measurement?
         #predictions = quantum_circuit(params, data)
         gradients = np.zeros_like(params)
 

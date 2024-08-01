@@ -7,8 +7,6 @@ from particleSwarmOptimizer import Swarm, Particle
 from autoEncoder import AutoEncoder
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit_aer import AerSimulator, Aer
-
-
 import numpy as np
 import random
 

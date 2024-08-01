@@ -2,15 +2,15 @@ import numpy as np
 from qiskit import QuantumCircuit
 
 def Ansatz(num_latent, num_trash, theta_list) -> QuantumCircuit:
-    if(not(len(theta_list) == num_trash + num_latent)):
-        raise Exception("invalid theta_list length while creating Ansatz")
+    # if(not(len(theta_list) == num_trash + num_latent)):
+    #     raise Exception("invalid theta_list length while creating Ansatz")
 
     ansatz_circuit = QuantumCircuit(num_latent + num_trash)
 
     # ry gates on all qubits
     n = num_latent + num_trash
     ry_circuit = QuantumCircuit(num_latent + num_trash)
-    for i in range(n):
+    for i in range(len(theta_list)):
         ry_circuit.ry(theta_list[i], i)
 
     trash_circuit = QuantumCircuit(num_latent + num_trash)

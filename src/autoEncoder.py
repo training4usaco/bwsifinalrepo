@@ -10,7 +10,7 @@ def AutoEncoder(data, fraud, num_categories, theta_list) -> tuple:
     num_trash = 3
     num_latent = data.num_qubits - num_trash
 
-    print(str(num_latent) + " " + str(num_trash))
+    # print(str(num_latent) + " " + str(num_trash))
 
     latent_register = QuantumRegister(num_latent)
     trash_register = QuantumRegister(num_trash)
@@ -39,7 +39,7 @@ def AutoEncoder(data, fraud, num_categories, theta_list) -> tuple:
     qc.barrier()
     # qc.measure(auxiliary_register, classical_register)
     qc.save_density_matrix(qubits=[num_latent + num_trash * 2]) # <== here
-    qc.measure_all()
+    # qc.measure_all()
     # print(qc.draw())
 
     simulator = AerSimulator()
@@ -48,6 +48,6 @@ def AutoEncoder(data, fraud, num_categories, theta_list) -> tuple:
     state = job.result().data()['density_matrix']
     # sv = state.to_statevector()
 
-    print(float(state[0][0]))
+    # print(float(state[0][0]))
 
     return(float(state[0][0]), fraud)

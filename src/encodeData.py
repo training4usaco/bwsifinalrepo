@@ -62,14 +62,9 @@ def EncodeData(num_categories, relative_path = "../data/card_transdata.csv") -> 
         for row in spamreader:  # pls help idk how to pythong
             for i in range(len(row)):
                 if(row[-1] == '1.0'):
-                    print('a')
                     fraud_data_set[i].append(float(row[i]))
                 else:
-                    print('b')
                     normal_data_set[i].append(float(row[i]))
-
-    print(fraud_data_set)
-    print(normal_data_set)
     
     # encode all the data and converts things to theta list
     return (FRQI(normal_data_set, num_categories), FRQI(fraud_data_set, num_categories))

@@ -25,6 +25,7 @@ def Ansatz(num_latent, num_trash, theta_list) -> QuantumCircuit:
         ansatz_circuit.cz(i % num_trash + num_latent, i)
 
     for rep in range(num_trash - 1):
+        ansatz_circuit.barrier()
         ansatz_circuit.compose(ry_circuit, inplace=True)
         ansatz_circuit.compose(trash_circuit, inplace=True)
         for i in range(num_latent):

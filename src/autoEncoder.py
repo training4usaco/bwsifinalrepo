@@ -1,47 +1,51 @@
 import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
-from qiskit.quantum_info import Statevector
 from ansatz import Ansatz
+from qiskit_aer import AerSimulator
+from qiskit.compiler import assemble
 
-def AutoEncoder(data, num_categories, theta_list) -> float:
+def AutoEncoder(data, fraud, num_categories, theta_list) -> tuple:
     num_latent = data.num_qubits - num_categories
     num_trash = num_categories
+
+    print(str(num_latent) + " " + str(num_trash))
+
     latent_register = QuantumRegister(num_latent)
     trash_register = QuantumRegister(num_trash)
+    reference_register = QuantumRegister(num_trash)
+    auxiliary_register = QuantumRegister(1)
+    classical_register = ClassicalRegister(1)
 
-    # NOTE: Swap stuff not needed for this
-    # reference_register = QuantumRegister(num_trash)
-    # auxiliary_register = QuantumRegister(1)
-    # classical_register = ClassicalRegister(num_trash)
-
-    qc = QuantumCircuit(latent_register, trash_register)
+    qc = QuantumCircuit(latent_register, trash_register, reference_register, auxiliary_register, classical_register)
 
     encoder_circuit = QuantumCircuit(latent_register, trash_register)
     encoder_circuit.compose(Ansatz(num_latent, num_trash, theta_list), range(num_latent + num_trash), inplace=True)
 
-    swap_circuit = QuantumCircuit(latent_register, trash_register)
+    swap_circuit = QuantumCircuit(latent_register, trash_register, reference_register, auxiliary_register, classical_register)
 
-    # swap_circuit.h(auxiliary_register)
-    # for i in range(num_trash):
-    #     swap_circuit.cswap(auxiliary_register, num_latent + i, num_latent + num_trash + i)
-
+    swap_circuit.h(auxiliary_register)
+    for i in range(num_trash):
+        swap_circuit.cswap(auxiliary_register, num_latent + i, num_latent + num_trash + i)
+    swap_circuit.h(auxiliary_register)
 
     qc.compose(encoder_circuit, inplace=True)
     qc.barrier()
-    # qc.compose(swap_circuit, inplace=True)
+    qc.compose(swap_circuit, inplace=True)
     qc.barrier()
+    qc.measure(auxiliary_register, classical_register)
 
-    for i in range(num_latent, num_latent + num_trash):
-        qc.reset(i)
+    # print(qc.draw())
 
-    qc.barrier()
+    simulator = AerSimulator()
+    compiled_circuit = transpile(qc, simulator)
+    sim_result = simulator.run(compiled_circuit).result()
+    counts = sim_result.get_counts()
 
-    qc.compose(encoder_circuit.inverse(), inplace=True)
+    if('0' not in counts):
+        counts['0'] = 0
 
-    input_data = Statevector(data).data
-    output_state = Statevector(qc).data
+    print(counts)
 
-    fidelity = np.sqrt(np.dot(input_data.conj(), output_state) ** 2)
+    return (1.0 - counts['0'] / 1024.0, fraud)   # tuple of (probability of 1, fraud)
 
-    return 1.0 - fidelity
 

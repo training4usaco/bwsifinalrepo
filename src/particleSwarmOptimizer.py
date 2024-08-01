@@ -1,32 +1,38 @@
 import numpy as np
 import math 
 import random
-from costfunc import cf
+import costfunc as cf
+import autoEncoder as AE
+from autoEncoder import AutoEncoder
+import encodeData as ED
+
 from sklearn.neighbors import KNeighborsClassifier
 
 class Particle:
     
-    def __init__(self, params, dimensions, bounds, c1, c2, w):
+    def __init__(self, dimensions, bounds, w):
         self.n = dimensions
         # self.bounds = bounds
-        self.c1 = c1  
-        self.c2 = c2  
+        # self.c1 = c1  
+        # self.c2 = c2  
         self.inertia = w    
 
-        self.positions = np.array([[random.uniform(bounds[i][0], bounds[i][1]) for i in range(dimensions)] for _ in range(num_particles)])
+        self.positions = np.array([random.uniform(bounds[0], bounds[1]) for i in range(dimensions)])
         self.velocities = np.zeros((dimensions))
         self.best_positions = self.positions
         self.best_neighbor_positions = self.best_positions
-        self.Us = np.random()
+        self.Us = [0,0]
         self.accelerations = [1,1]
         self.n = dimensions
-        self.cost = cf.customCost()
-    def updateCost(self):
-        self.cost = cf.customCost()
+        self.cost = 1
+
+    def updateCost(self, p0, p1):
+        self.cost = cf.cost(p0, p1)
 
 
-    def stepAlgorithm(self):
-        
+
+    def stepAlgorithm(self, p0, p1):
+        self.updateCost(p0, p1)
         
         for i in range(len(self.velocities)):
             inertia =  self.inertia*self.velocities[i] 
@@ -38,10 +44,6 @@ class Particle:
             self.positions[i] += self.velocities[i]
 
 
-    def updateUs(self):
-        for j in range(self.Us):
-            for i in range(self.n):
-                self.Us[j] = np.diag(np.random.rand(self.dimensions))
 
     
 
@@ -52,56 +54,73 @@ class Swarm:
         self.dims = dimensions
         self.bounds = [bounds*self.dims]
         self.lowestCosts = []
+        self.bestParticle = particleList[0]
         self.tolerance = 2
         self.epochTolerance = 10
 
-    def find_closest_neighbors(particle_positions, query_position, n_neighbors):
-        X = np.array(particle_positions)
-        y = np.zeros(X.shape[0])
+    def find_closest_neighbors(self, particles, query_particle, n_neighbors):
+        particle_positions = np.array([p.positions for p in particles])
+        query_position = query_particle.positions
         
         knn = KNeighborsClassifier(n_neighbors=n_neighbors)
-        knn.fit(X, y)
+        knn.fit(particle_positions, np.zeros(particle_positions.shape[0]))
         
         distances, indices = knn.kneighbors([query_position], n_neighbors=n_neighbors)
         
-        closest_neighbors = [(X[i], distances[0][j]) for j, i in enumerate(indices[0])]
+        closest_neighbors = [particles[i] for i in indices[0]]
         
         return closest_neighbors
 
     def updateBestNeighbors(self):
         for particle in self.particles:
-            particle_positions = [p.positions for p in self.particles]
-            n_neighbors = self.num_particles 
-            neighbors = self.find_closest_neighbors(particle_positions, particle.positions, n_neighbors)
+    
+            n_neighbors = min(self.num_particles, len(self.particles))
+            neighbors = self.find_closest_neighbors(self.particles, particle, n_neighbors)
             
             
             costs = []
-            for neighbor in neighbors:
-                neighbor_position = neighbor[0]  
-                cost = self.cf(neighbor_position)
+            for neighbor in neighbors: 
+                cost = neighbor.cost
                 costs.append(cost)
         
             best_neighbor_index = np.argmin(costs)
-            best_neighbor_position = neighbors[best_neighbor_index][0]
+            best_neighbor = neighbors[best_neighbor_index]
             
              
-            if best_neighbor_index != 0: 
-                particle.best_neighbor_positions = best_neighbor_position
+            if best_neighbor != particle: 
+                particle.best_neighbor_positions = best_neighbor.positions
+                particle.cost = best_neighbor.cost
             
-            particle.updateCost()
+
             self.lowestCosts.append(particle.cost)
 
             if len(self.lowestCosts) > self.epochTolerance:
                 del self.lowestCosts[0]
+            
+    def lowestCost(self):
+        pass
     
-    
-    def stepAlgorithm(self):      
-        self.updateBestNeighbors()  
-        for i in self.particles:
-            i.stepAlgorithm()
-    
-    def runAlgorithm(self):
+
+    def stepAlgorithm(self, normal_data, fraud_data):
         if len(self.lowestCosts) == self.epochTolerance and np.ptp(self.lowestCosts, axis=1) < self.tolerance:
-            return
-        self.stepAlgorithm()
+            return min(self.particles, key = self.particles.cost).positions
+            #return positions with the lowest cost
+        
+        self.updateBestNeighbors() 
+
+        newUs = [np.diag(np.random.rand(self.dims)), np.diag(np.random.rand(self.dims))]
+
+        for i in self.particles:
+            i.Us = newUs
+            
+            p0 = AutoEncoder(normal_data, self.dims, i.positions)
+            p1 = AutoEncoder(fraud_data, self.dims, i.positions)
+            i.stepAlgorithm(p0, p1)
+
+            if i.cost == 0:
+                return i.positions
+        
+        return None
+        
+
             
